@@ -2,7 +2,7 @@
 
 **Curso de datilografia futurista** — exercícios progressivos, testes cronometrados, provas com nota, desafios diários, ranking real e login (incluindo Google).
 
-Arquivo principal: `KeyboardPRO.html` (tudo em um único HTML, sem servidor obrigatório).
+Arquivo principal: index.html` (tudo em um único HTML, sem servidor obrigatório).
 
 ---
 
