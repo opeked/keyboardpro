@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KeyboardPRO — Curso de Datilografia Futurista</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root {
+    --neon-cyan: #00f5ff;
+    --neon-pink: #ff00aa;
+    --neon-purple: #b026ff;
+    --neon-green: #39ff14;
+    --bg-dark: #050510;
+    --card-bg: rgba(12, 12, 30, 0.85);
+    --text: #e0e0ff;
+    --muted: #8890b0;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  #particles-canvas {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    z-index: 0; pointer-events: none;
+  }
+  .app { position: relative; z-index: 1; min-height: 100vh; display:flex; flex-direction:column; }
+
+  /* NAV */
+  .navbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 14px 28px;
+    background: rgba(8,8,25,0.9);
+    border-bottom: 1px solid rgba(0,245,255,0.25);
+    backdrop-filter: blur(12px);
+    position: sticky; top:0; z-index:100;
+  }
+  .logo {
+    font-size: 1.6rem; font-weight: 800; letter-spacing: 1px;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(0,245,255,0.5);
+  }
+  .nav-links { display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  .nav-btn {
+    background: transparent; border: 1px solid transparent;
+    color: var(--muted); padding: 8px 14px; border-radius: 8px;
+    cursor: pointer; font-size: 0.95rem; transition: all 0.25s;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    color: var(--neon-cyan);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 12px rgba(0,245,255,0.35);
+  }
+  .user-badge {
+    background: rgba(0,245,255,0.12);
+    border: 1px solid var(--neon-cyan);
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 0.9rem; color: var(--neon-cyan);
+  }
+
+  /* PAGES */
+  .page { display:none; padding: 30px 20px; max-width: 1100px; margin: 0 auto; width:100%; }
+  .page.active { display:block; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:none} }
+
+  /* CARDS */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid rgba(0,245,255,0.2);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 30px rgba(0,245,255,0.08);
+  }
+  .card h2 {
+    font-size: 1.4rem; margin-bottom: 16px;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0,245,255,0.4);
+  }
+  .card h3 { color: var(--neon-pink); margin-bottom: 10px; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items:center; gap:8px;
+    padding: 12px 22px; border-radius: 10px; border: none;
+    font-weight: 600; cursor: pointer; font-size: 1rem;
+    transition: all 0.25s; text-decoration: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #00c4cc, #0088aa);
+    color: #fff; box-shadow: 0 0 18px rgba(0,245,255,0.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 28px rgba(0,245,255,0.6); }
+  .btn-pink {
+    background: linear-gradient(135deg, #ff00aa, #aa0066);
+    color:#fff; box-shadow: 0 0 18px rgba(255,0,170,0.4);
+  }
+  .btn-pink:hover { transform: translateY(-2px); }
+  .btn-outline {
+    background: transparent; border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+  }
+  .btn-outline:hover { background: rgba(0,245,255,0.15); }
+  .btn-group { display:flex; gap:12px; flex-wrap:wrap; margin-top:16px; }
+
+  /* AUTH */
+  .auth-wrap {
+    max-width: 920px; margin: 40px auto; display: grid;
+    grid-template-columns: 1fr 1fr; gap: 0;
+    border-radius: 20px; overflow: hidden;
+    border: 1px solid rgba(0,245,255,0.25);
+    box-shadow: 0 0 50px rgba(0,245,255,0.12);
+    background: var(--card-bg);
+  }
+  .auth-hero {
+    padding: 48px 36px;
+    background: linear-gradient(160deg, rgba(0,245,255,0.12), rgba(255,0,170,0.1), rgba(5,5,16,0.9));
+    display: flex; flex-direction: column; justify-content: center;
+    border-right: 1px solid rgba(0,245,255,0.15);
+  }
+  .auth-hero h1 {
+    font-size: 1.9rem; margin-bottom: 12px;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .auth-hero p { color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+  .auth-hero ul { list-style: none; color: var(--text); font-size: 0.95rem; }
+  .auth-hero ul li { margin-bottom: 10px; padding-left: 4px; }
+  .auth-hero ul li::before { content: '▸ '; color: var(--neon-cyan); }
+  .auth-panel { padding: 40px 36px; }
+  .auth-tabs {
+    display: flex; gap: 0; margin-bottom: 28px;
+    background: rgba(0,0,0,0.35); border-radius: 12px; padding: 4px;
+  }
+  .auth-tabs button {
+    flex: 1; padding: 12px; border: none; border-radius: 10px;
+    background: transparent; color: var(--muted); font-weight: 600;
+    cursor: pointer; transition: all 0.25s; font-size: 0.95rem;
+  }
+  .auth-tabs button.active-tab {
+    background: linear-gradient(135deg, rgba(0,245,255,0.25), rgba(255,0,170,0.2));
+    color: var(--neon-cyan);
+    box-shadow: 0 0 16px rgba(0,245,255,0.2);
+  }
+  .auth-panel h2 {
+    font-size: 1.35rem; margin-bottom: 6px; color: var(--text);
+  }
+  .auth-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 22px; }
+  .auth-panel input {
+    width: 100%; padding: 14px 16px; margin-bottom: 14px;
+    background: rgba(20,20,50,0.8); border: 1px solid rgba(0,245,255,0.3);
+    border-radius: 12px; color: var(--text); font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .auth-panel input:focus {
+    outline: none; border-color: var(--neon-cyan);
+    box-shadow: 0 0 14px rgba(0,245,255,0.3);
+  }
+  .auth-divider {
+    display: flex; align-items: center; gap: 14px;
+    margin: 22px 0; color: var(--muted); font-size: 0.85rem;
+  }
+  .auth-divider::before, .auth-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: rgba(0,245,255,0.2);
+  }
+  .btn-google {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px;
+    padding: 13px 20px; border-radius: 12px; cursor: pointer; font-weight: 600;
+    font-size: 1rem; border: 1px solid rgba(255,255,255,0.2);
+    background: #fff; color: #333; transition: all 0.25s;
+  }
+  .btn-google:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(255,255,255,0.15);
+  }
+  .btn-google svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .auth-msg { margin-top: 14px; font-size: 0.9rem; min-height: 1.2em; }
+  .auth-msg.error { color: var(--neon-pink); }
+  .auth-msg.ok { color: var(--neon-green); }
+  #googleBtnHost { display: flex; justify-content: center; margin-top: 8px; min-height: 44px; }
+  @media (max-width: 760px) {
+    .auth-wrap { grid-template-columns: 1fr; margin: 20px 12px; }
+    .auth-hero { border-right: none; border-bottom: 1px solid rgba(0,245,255,0.15); padding: 32px 24px; }
+    .auth-panel { padding: 28px 24px; }
+  }
+
+  /* LEVEL CARDS */
+  .levels-grid {
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+    gap:20px;
+  }
+  .level-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(0,245,255,0.25);
+    border-radius: 16px; padding: 24px; text-align:center;
+    transition: all 0.3s; cursor:pointer;
+  }
+  .level-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0,245,255,0.25);
+  }
+  .level-card.iniciante { border-color: rgba(57,255,20,0.4); }
+  .level-card.intermediario { border-color: rgba(0,245,255,0.4); }
+  .level-card.profissional { border-color: rgba(255,0,170,0.4); }
+  .level-icon { font-size: 2.8rem; margin-bottom:12px; }
+  .level-card h3 { margin-bottom:8px; }
+  .level-card p { color:var(--muted); font-size:0.9rem; margin-bottom:16px; }
+
+  /* TYPING AREA */
+  .typing-container { max-width: 900px; margin:0 auto; }
+  .stats-bar {
+    display:flex; gap:20px; flex-wrap:wrap; justify-content:center;
+    margin-bottom:20px;
+  }
+  .stat {
+    background: rgba(0,245,255,0.08);
+    border:1px solid rgba(0,245,255,0.25);
+    padding:12px 20px; border-radius:12px; text-align:center; min-width:100px;
+  }
+  .stat-value { font-size:1.6rem; font-weight:700; color:var(--neon-cyan); }
+  .stat-label { font-size:0.8rem; color:var(--muted); }
+  .text-display {
+    background: rgba(8,8,25,0.9);
+    border:1px solid rgba(0,245,255,0.3);
+    border-radius:14px; padding:28px;
+    font-size:1.35rem; line-height:1.8; letter-spacing:0.5px;
+    min-height:160px; margin-bottom:18px;
+    word-wrap:break-word; white-space:pre-wrap;
+    font-family: 'Courier New', monospace;
+  }
+  .char { transition: color 0.1s; }
+  .char.correct { color: var(--neon-green); }
+  .char.incorrect { color: var(--neon-pink); background:rgba(255,0,170,0.2); }
+  .char.current { background: rgba(0,245,255,0.35); border-radius:3px; }
+  .char.pending { color: #667; }
+  .input-area {
+    width:100%; padding:16px; font-size:1.2rem;
+    background: rgba(15,15,40,0.9);
+    border:2px solid var(--neon-cyan);
+    border-radius:12px; color:var(--text);
+    font-family: 'Courier New', monospace;
+    outline:none; resize:none; min-height:80px;
+  }
+  .input-area:focus { box-shadow: 0 0 20px rgba(0,245,255,0.35); }
+  .input-area:disabled { opacity:0.6; }
+
+  /* RESULT */
+  .result-box { text-align:center; }
+  .grade {
+    font-size: 3.5rem; font-weight:800; margin:16px 0;
+    text-shadow: 0 0 30px currentColor;
+  }
+  .grade.A { color: var(--neon-green); }
+  .grade.B { color: #7fff00; }
+  .grade.C { color: #ffcc00; }
+  .grade.D { color: #ff8800; }
+  .grade.F { color: var(--neon-pink); }
+  .chart-wrap { max-width:500px; margin:24px auto; }
+
+  /* RANKING */
+  .ranking-table { width:100%; border-collapse:collapse; }
+  .ranking-table th, .ranking-table td {
+    padding:12px 14px; text-align:left; border-bottom:1px solid rgba(0,245,255,0.15);
+  }
+  .ranking-table th { color:var(--neon-cyan); font-weight:600; }
+  .ranking-table tr:hover td { background:rgba(0,245,255,0.06); }
+  .rank-pos { font-weight:700; color:var(--neon-pink); }
+  .rank-you { background:rgba(0,245,255,0.12) !important; }
+
+  /* CHALLENGES */
+  .challenge-card {
+    background: linear-gradient(135deg, rgba(0,245,255,0.08), rgba(255,0,170,0.08));
+    border:1px solid rgba(0,245,255,0.3);
+    border-radius:14px; padding:20px; margin-bottom:14px;
+  }
+  .challenge-card.done { border-color:var(--neon-green); opacity:0.85; }
+  .challenge-status { font-size:0.85rem; margin-top:8px; }
+
+  /* DASHBOARD */
+  .dash-grid {
+    display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap:16px; margin-bottom:24px;
+  }
+  .dash-stat {
+    background:var(--card-bg); border:1px solid rgba(0,245,255,0.2);
+    border-radius:14px; padding:20px; text-align:center;
+  }
+  .dash-stat .num { font-size:2rem; font-weight:800; color:var(--neon-cyan); }
+  .dash-stat .lbl { color:var(--muted); font-size:0.9rem; }
+
+  /* FOOTER */
+  footer {
+    text-align:center; padding:24px; color:var(--muted); font-size:0.85rem;
+    border-top:1px solid rgba(0,245,255,0.15); margin-top:auto;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,0.75);
+    display:flex; align-items:center; justify-content:center;
+    z-index:200; opacity:0; pointer-events:none; transition:opacity 0.3s;
+  }
+  .modal-overlay.show { opacity:1; pointer-events:auto; }
+  .modal {
+    background: var(--card-bg); border:1px solid var(--neon-cyan);
+    border-radius:16px; padding:28px; max-width:480px; width:90%;
+    box-shadow: 0 0 40px rgba(0,245,255,0.3);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width:600px) {
+    .navbar { padding:12px 14px; }
+    .nav-links { gap:8px; }
+    .nav-btn { padding:6px 10px; font-size:0.85rem; }
+    .text-display { font-size:1.1rem; padding:18px; }
+    .stats-bar { gap:10px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="particles-canvas"></canvas>
+<div class="app">
+  <!-- NAV -->
+  <nav class="navbar">
+    <div class="logo">⌨ KeyboardPRO</div>
+    <div class="nav-links" id="navLinks">
+      <button class="nav-btn active" data-page="home">Início</button>
+      <button class="nav-btn" data-page="lessons" id="navLessons" style="display:none">Exercícios</button>
+      <button class="nav-btn" data-page="test" id="navTest" style="display:none">Teste Rápido</button>
+      <button class="nav-btn" data-page="exam" id="navExam" style="display:none">Provas</button>
+      <button class="nav-btn" data-page="challenges" id="navChallenges" style="display:none">Desafios</button>
+      <button class="nav-btn" data-page="ranking" id="navRanking" style="display:none">Ranking</button>
+      <button class="nav-btn" data-page="dashboard" id="navDash" style="display:none">Painel</button>
+      <span class="user-badge" id="userBadge" style="display:none"></span>
+      <button class="nav-btn" id="btnLogout" style="display:none" onclick="logout()">Sair</button>
+      <button class="nav-btn" id="btnLoginNav" data-page="auth">Entrar</button>
+    </div>
+  </nav>
+
+  <!-- HOME -->
+  <section class="page active" id="page-home">
+    <div style="text-align:center; padding:40px 0 20px">
+      <h1 style="font-size:clamp(2rem,5vw,3.2rem); margin-bottom:12px;
+        background:linear-gradient(90deg,var(--neon-cyan),var(--neon-pink));
+        -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+        Domine a Datilografia
+      </h1>
+      <p style="color:var(--muted); font-size:1.15rem; max-width:560px; margin:0 auto 28px">
+        Curso completo com exercícios progressivos, testes cronometrados, provas oficiais,
+        desafios diários e ranking real. Treine como um profissional.
+      </p>
+      <div class="btn-group" style="justify-content:center">
+        <button class="btn btn-primary" onclick="showPage('auth')">Começar Agora</button>
+        <button class="btn btn-outline" onclick="showPage('ranking')">Ver Ranking</button>
+      </div>
+    </div>
+    <div class="levels-grid" style="margin-top:40px">
+      <div class="level-card iniciante">
+        <div class="level-icon">🌱</div>
+        <h3 style="color:var(--neon-green)">Iniciante</h3>
+        <p>Home row, letras básicas e postura correta. Ideal para quem está começando.</p>
+      </div>
+      <div class="level-card intermediario">
+        <div class="level-icon">⚡</div>
+        <h3 style="color:var(--neon-cyan)">Intermediário</h3>
+        <p>Todas as letras, números e textos mais longos. Aumente velocidade e precisão.</p>
+      </div>
+      <div class="level-card profissional">
+        <div class="level-icon">🔥</div>
+        <h3 style="color:var(--neon-pink)">Profissional</h3>
+        <p>Pontuação, símbolos, textos complexos e provas oficiais. Nível elite.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTH -->
+  <section class="page" id="page-auth">
+    <div class="auth-wrap">
+      <div class="auth-hero">
+        <h1>KeyboardPRO</h1>
+        <p>Treine datilografia com visual futurista, provas, desafios e ranking real.</p>
+        <ul>
+          <li>Exercícios Iniciante → Profissional</li>
+          <li>Testes com tempo e gráficos</li>
+          <li>Provas com nota oficial</li>
+          <li>Desafios diários e ranking</li>
+        </ul>
+      </div>
+      <div class="auth-panel">
+        <div class="auth-tabs">
+          <button type="button" class="active-tab" id="tabLogin" onclick="switchAuth('login')">Entrar</button>
+          <button type="button" id="tabRegister" onclick="switchAuth('register')">Criar conta</button>
+        </div>
+
+        <div id="loginForm">
+          <h2>Bem-vindo de volta</h2>
+          <p class="auth-sub">Entre com sua conta ou com o Google</p>
+          <input type="text" id="loginUser" placeholder="Nome de usuário" autocomplete="username">
+          <input type="password" id="loginPass" placeholder="Senha" autocomplete="current-password">
+          <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Entrar</button>
+          <div class="auth-divider">ou</div>
+          <button type="button" class="btn-google" onclick="loginWithGoogle()">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continuar com Google
+          </button>
+          <div id="googleBtnHost"></div>
+          <p class="auth-msg" id="authMsg"></p>
+        </div>
+
+        <div id="registerForm" style="display:none">
+          <h2>Criar sua conta</h2>
+          <p class="auth-sub">Leva menos de 30 segundos</p>
+          <input type="text" id="regUser" placeholder="Nome de usuário (mín. 3)" autocomplete="username">
+          <input type="password" id="regPass" placeholder="Senha (mín. 4)" autocomplete="new-password">
+          <input type="password" id="regPass2" placeholder="Confirmar senha">
+          <button class="btn btn-pink" style="width:100%" onclick="doRegister()">Criar conta</button>
+          <div class="auth-divider">ou</div>
+          <button type="button" class="btn-google" onclick="loginWithGoogle()">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continuar com Google
+          </button>
+          <p class="auth-msg" id="regMsg"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LESSONS -->
+  <section class="page" id="page-lessons">
+    <h2 style="color:var(--neon-cyan); margin-bottom:20px">Exercícios por Nível</h2>
+    <div class="levels-grid" id="lessonsGrid"></div>
+  </section>
+
+  <!-- TYPING SESSION -->
+  <section class="page" id="page-typing">
+    <div class="typing-container">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px">
+        <h2 id="typingTitle" style="color:var(--neon-cyan)">Exercício</h2>
+        <button class="btn btn-outline" onclick="showPage('lessons')">← Voltar</button>
+      </div>
+      <div class="stats-bar">
+        <div class="stat"><div class="stat-value" id="statTime">0:00</div><div class="stat-label">Tempo</div></div>
+        <div class="stat"><div class="stat-value" id="statWpm">0</div><div class="stat-label">PPM</div></div>
+        <div class="stat"><div class="stat-value" id="statAcc">100%</div><div class="stat-label">Precisão</div></div>
+        <div class="stat"><div class="stat-value" id="statErrors">0</div><div class="stat-label">Erros</div></div>
+      </div>
+      <div class="text-display" id="textDisplay"></div>
+      <textarea class="input-area" id="typeInput" placeholder="Comece a digitar aqui..." autocomplete="off" spellcheck="false"></textarea>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btnStart" onclick="startTyping()">Iniciar</button>
+        <button class="btn btn-outline" id="btnReset" onclick="resetTyping()" style="display:none">Reiniciar</button>
+        <button class="btn btn-pink" id="btnFinish" onclick="finishTyping()" style="display:none">Finalizar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="page" id="page-result">
+    <div class="card result-box">
+      <h2>Resultado</h2>
+      <div class="grade" id="resultGrade">A</div>
+      <p id="resultMsg" style="font-size:1.2rem; margin-bottom:20px"></p>
+      <div class="stats-bar" style="justify-content:center">
+        <div class="stat"><div class="stat-value" id="resWpm">0</div><div class="stat-label">PPM</div></div>
+        <div class="stat"><div class="stat-value" id="resAcc">0%</div><div class="stat-label">Precisão</div></div>
+        <div class="stat"><div class="stat-value" id="resTime">0s</div><div class="stat-label">Tempo</div></div>
+        <div class="stat"><div class="stat-value" id="resErrors">0</div><div class="stat-label">Erros</div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="resultChart"></canvas></div>
+      <div class="btn-group" style="justify-content:center; margin-top:20px">
+        <button class="btn btn-primary" onclick="showPage('lessons')">Novo Exercício</button>
+        <button class="btn btn-outline" onclick="showPage('dashboard')">Painel</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICK TEST -->
+  <section class="page" id="page-test">
+    <div class="card">
+      <h2>Teste Rápido</h2>
+      <p style="color:var(--muted); margin-bottom:16px">Escolha a duração e meça sua velocidade real.</p>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="startQuickTest(60)">1 minuto</button>
+        <button class="btn btn-primary" onclick="startQuickTest(180)">3 minutos</button>
+        <button class="btn btn-pink" onclick="startQuickTest(300)">5 minutos</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXAM -->
+  <section class="page" id="page-exam">
+    <div class="card">
+      <h2>Sistema de Provas</h2>
+      <p style="color:var(--muted); margin-bottom:16px">Provas oficiais com nota. Nota mínima para aprovação: 70.</p>
+      <div class="levels-grid">
+        <div class="level-card iniciante" onclick="startExam('iniciante')">
+          <div class="level-icon">📜</div>
+          <h3 style="color:var(--neon-green)">Prova Iniciante</h3>
+          <p>Texto simples · 2 minutos · Nota A–F</p>
+        </div>
+        <div class="level-card intermediario" onclick="startExam('intermediario')">
+          <div class="level-icon">📜</div>
+          <h3 style="color:var(--neon-cyan)">Prova Intermediária</h3>
+          <p>Texto médio · 3 minutos · Nota A–F</p>
+        </div>
+        <div class="level-card profissional" onclick="startExam('profissional')">
+          <div class="level-icon">📜</div>
+          <h3 style="color:var(--neon-pink)">Prova Profissional</h3>
+          <p>Texto avançado · 5 minutos · Nota A–F</p>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="examHistoryCard" style="display:none">
+      <h3>Suas Últimas Provas</h3>
+      <div id="examHistory"></div>
+    </div>
+  </section>
+
+  <!-- CHALLENGES -->
+  <section class="page" id="page-challenges">
+    <div class="card">
+      <h2>Desafios Diários</h2>
+      <p style="color:var(--muted); margin-bottom:8px">
+        Complete desafios diários para melhorar sua velocidade e precisão.
+      </p>
+      <p id="weekProgress" style="margin-bottom:20px; color:var(--neon-green)"></p>
+      <div id="challengesList"></div>
+    </div>
+  </section>
+
+  <!-- RANKING -->
+  <section class="page" id="page-ranking">
+    <div class="card">
+      <h2>Ranking</h2>
+      <p style="color:var(--muted); margin-bottom:16px; font-size:0.95rem">
+        Apenas usuários reais que já fizeram pelo menos 1 teste. Ordenado por PPM médio.
+      </p>
+      <table class="ranking-table">
+        <thead>
+          <tr><th>#</th><th>Usuário</th><th>PPM Médio</th><th>Precisão</th><th>Testes</th><th>Desafios/sem</th></tr>
+        </thead>
+        <tbody id="rankingBody"></tbody>
+      </table>
+      <p id="rankingEmpty" style="display:none; color:var(--muted); margin-top:16px; text-align:center">
+        Nenhum usuário no ranking ainda. Faça um teste para aparecer aqui!
+      </p>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section class="page" id="page-dashboard">
+    <h2 style="color:var(--neon-cyan); margin-bottom:20px">Seu Painel</h2>
+    <div class="dash-grid" id="dashStats"></div>
+    <div class="card">
+      <h3>Histórico de Performance</h3>
+      <div class="chart-wrap" style="max-width:100%"><canvas id="historyChart"></canvas></div>
+    </div>
+  </section>
+
+  <footer>
+    KeyboardPRO © 2026 — Datilografia futurista · Dados salvos localmente no seu navegador
+  </footer>
+</div>
+
+<script>
+/* ===================== PARTICLES ===================== */
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 0.6;
+    this.speedY = (Math.random() - 0.5) * 0.6;
+    this.color = Math.random() > 0.5 ? 'rgba(0,245,255,' : 'rgba(255,0,170,';
+    this.alpha = Math.random() * 0.5 + 0.1;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = this.color + this.alpha + ')';
+    ctx.fill();
+  }
+}
+for (let i = 0; i < 80; i++) particles.push(new Particle());
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  // connect close particles
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(0,245,255,${0.15 * (1 - dist / 120)})`;
+        ctx.lineWidth = 0.5;
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+/* ===================== DATABASE (safe storage with memory fallback) ===================== */
+const DB_KEY = 'keyboardpro_db_v1';
+const memoryStore = {}; // fallback when localStorage is blocked (sandbox / iframe)
+
+function safeGet(key) {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.getItem(key);
+    }
+  } catch (e) { /* sandboxed or blocked */ }
+  return memoryStore.hasOwnProperty(key) ? memoryStore[key] : null;
+}
+
+function safeSet(key, value) {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(key, value);
+      return;
+    }
+  } catch (e) { /* sandboxed or blocked */ }
+  memoryStore[key] = value;
+}
+
+function loadDB() {
+  try {
+    const raw = safeGet(DB_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return { users: {}, currentUser: null };
+}
+
+function saveDB(dbObj) {
+  try {
+    safeSet(DB_KEY, JSON.stringify(dbObj));
+  } catch (e) {}
+}
+
+let db = loadDB();
+
+/* ===================== AUTH ===================== */
+let currentUser = db.currentUser;
+
+/* Coloque seu Google OAuth Client ID aqui para login real:
+   https://console.cloud.google.com/ → APIs e serviços → Credenciais → ID do cliente OAuth
+   Tipo: Aplicativo da Web. Em origens JavaScript autorizadas, adicione o domínio onde o site roda.
+   Se deixar vazio, usa o modo demonstração (escolhe nome Google simulado). */
+const GOOGLE_CLIENT_ID = ''; // ex: '123456789-xxxx.apps.googleusercontent.com'
+
+function switchAuth(mode) {
+  document.getElementById('loginForm').style.display = mode === 'login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = mode === 'register' ? 'block' : 'none';
+  document.getElementById('tabLogin').classList.toggle('active-tab', mode === 'login');
+  document.getElementById('tabRegister').classList.toggle('active-tab', mode === 'register');
+  const am = document.getElementById('authMsg');
+  const rm = document.getElementById('regMsg');
+  if (am) { am.textContent = ''; am.className = 'auth-msg'; }
+  if (rm) { rm.textContent = ''; rm.className = 'auth-msg'; }
+}
+
+function createUserRecord(extra) {
+  return {
+    pass: extra.pass || '',
+    provider: extra.provider || 'local',
+    email: extra.email || '',
+    picture: extra.picture || '',
+    wpmHistory: [],
+    accHistory: [],
+    challengesThisWeek: 0,
+    lastChallengeDate: null,
+    weekStart: getWeekStart(),
+    exams: [],
+    totalTests: 0,
+    avgWpm: 0,
+    avgAcc: 100,
+    created: Date.now()
+  };
+}
+
+function doRegister() {
+  const u = document.getElementById('regUser').value.trim();
+  const p = document.getElementById('regPass').value;
+  const p2 = document.getElementById('regPass2').value;
+  const msg = document.getElementById('regMsg');
+  msg.className = 'auth-msg error';
+  if (u.length < 3) { msg.textContent = 'Usuário precisa ter pelo menos 3 caracteres.'; return; }
+  if (p.length < 4) { msg.textContent = 'Senha precisa ter pelo menos 4 caracteres.'; return; }
+  if (p !== p2) { msg.textContent = 'Senhas não coincidem.'; return; }
+  if (db.users[u]) { msg.textContent = 'Usuário já existe.'; return; }
+  db.users[u] = createUserRecord({ pass: p, provider: 'local' });
+  db.currentUser = u;
+  currentUser = u;
+  saveDB(db);
+  msg.className = 'auth-msg ok';
+  msg.textContent = 'Conta criada!';
+  afterLogin();
+}
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const msg = document.getElementById('authMsg');
+  msg.className = 'auth-msg error';
+  if (!db.users[u] || db.users[u].pass !== p) {
+    msg.textContent = 'Usuário ou senha incorretos.';
+    return;
+  }
+  if (db.users[u].provider === 'google' && !p) {
+    msg.textContent = 'Esta conta usa Google. Clique em Continuar com Google.';
+    return;
+  }
+  db.currentUser = u;
+  currentUser = u;
+  saveDB(db);
+  msg.className = 'auth-msg ok';
+  msg.textContent = '';
+  afterLogin();
+}
+
+function ensureGoogleUser(name, email, picture) {
+  // username único baseado no email ou nome
+  let uname = (email || name || 'google_user').split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_');
+  if (uname.length < 3) uname = 'g_' + uname;
+  // se já existe com mesmo email google, reutiliza
+  let existing = Object.keys(db.users).find(k => db.users[k].email === email && db.users[k].provider === 'google');
+  if (existing) {
+    uname = existing;
+  } else if (db.users[uname] && db.users[uname].provider !== 'google') {
+    uname = uname + '_' + Math.floor(Math.random() * 999);
+  }
+  if (!db.users[uname]) {
+    db.users[uname] = createUserRecord({ provider: 'google', email: email || '', picture: picture || '' });
+  } else {
+    db.users[uname].email = email || db.users[uname].email;
+    db.users[uname].picture = picture || db.users[uname].picture;
+    db.users[uname].provider = 'google';
+  }
+  db.currentUser = uname;
+  currentUser = uname;
+  saveDB(db);
+  afterLogin();
+}
+
+function parseJwt(token) {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(decodeURIComponent(atob(base64).split('').map(c =>
+      '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    ).join('')));
+  } catch (e) { return null; }
+}
+
+function handleGoogleCredential(response) {
+  const payload = parseJwt(response.credential);
+  if (!payload) {
+    const msg = document.getElementById('authMsg') || document.getElementById('regMsg');
+    if (msg) { msg.className = 'auth-msg error'; msg.textContent = 'Falha ao ler dados do Google.'; }
+    return;
+  }
+  ensureGoogleUser(payload.name || payload.given_name, payload.email, payload.picture);
+}
+
+function loginWithGoogle() {
+  const msg = document.getElementById('authMsg') || document.getElementById('regMsg');
+  if (GOOGLE_CLIENT_ID && window.google && google.accounts && google.accounts.id) {
+    // Dispara o prompt do Google Identity Services
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredential,
+      auto_select: false
+    });
+    google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        // fallback: botão renderizado
+        const host = document.getElementById('googleBtnHost');
+        if (host) {
+          host.innerHTML = '';
+          google.accounts.id.renderButton(host, {
+            theme: 'outline', size: 'large', width: 320, text: 'continue_with', shape: 'pill'
+          });
+        }
+        if (msg) {
+          msg.className = 'auth-msg';
+          msg.textContent = 'Use o botão do Google abaixo, se o popup não abrir.';
+        }
+      }
+    });
+    return;
+  }
+
+  // Modo demonstração (sem Client ID): simula login Google pedindo um nome
+  const nome = prompt('Modo demonstração Google\n\nDigite o nome da sua conta Google (ou deixe em branco para cancelar):', 'Usuario Google');
+  if (!nome || !nome.trim()) {
+    if (msg) { msg.className = 'auth-msg error'; msg.textContent = 'Login Google cancelado.'; }
+    return;
+  }
+  const clean = nome.trim();
+  const email = clean.toLowerCase().replace(/\s+/g, '.') + '@gmail.com';
+  ensureGoogleUser(clean, email, '');
+  if (msg) { msg.className = 'auth-msg ok'; msg.textContent = 'Entrada com Google (demo) realizada!'; }
+}
+
+// Inicializa GSI quando o script do Google carregar (se Client ID configurado)
+function initGoogleSignIn() {
+  if (!GOOGLE_CLIENT_ID || !window.google || !google.accounts || !google.accounts.id) return;
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleCredential
+  });
+}
+// Tenta após um tempo (script async)
+setTimeout(initGoogleSignIn, 800);
+setTimeout(initGoogleSignIn, 2000);
+
+function logout() {
+  db.currentUser = null;
+  currentUser = null;
+  saveDB(db);
+  updateNav();
+  showPage('home');
+}
+
+function afterLogin() {
+  updateNav();
+  showPage('dashboard');
+  refreshDashboard();
+}
+
+function updateNav() {
+  const logged = !!currentUser;
+  ['navLessons','navTest','navExam','navChallenges','navRanking','navDash','btnLogout','userBadge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = logged ? '' : 'none';
+  });
+  const loginBtn = document.getElementById('btnLoginNav');
+  if (loginBtn) loginBtn.style.display = logged ? 'none' : '';
+  if (logged) {
+    const badge = document.getElementById('userBadge');
+    if (badge) badge.textContent = '👤 ' + currentUser;
+  }
+}
+
+function getUser() {
+  return currentUser ? db.users[currentUser] : null;
+}
+
+/* ===================== NAVIGATION ===================== */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`.nav-btn[data-page="${id}"]`);
+  if (btn) btn.classList.add('active');
+
+  if (id === 'lessons') renderLessons();
+  if (id === 'challenges') renderChallenges();
+  if (id === 'ranking') renderRanking();
+  if (id === 'dashboard') refreshDashboard();
+  if (id === 'exam') renderExamHistory();
+}
+
+document.getElementById('navLinks').addEventListener('click', e => {
+  const btn = e.target.closest('[data-page]');
+  if (btn) showPage(btn.dataset.page);
+});
+
+/* ===================== TEXTS ===================== */
+const TEXTS = {
+  iniciante: [
+    "asdf jkl; asdf jkl; asdf jkl; fjdk slaa fjdk slaa",
+    "a s d f j k l ; aa ss dd ff jj kk ll ;;",
+    "fala sala asa fala sala asa dada fada",
+    "o rato roeu a roupa do rei de roma",
+    "casa alta sala limpa mesa boa"
+  ],
+  intermediario: [
+    "A prática constante é o caminho mais rápido para a excelência na digitação.",
+    "Velocidade e precisão caminham juntas quando você treina todos os dias.",
+    "Os dedos aprendem o teclado da mesma forma que a mente aprende um idioma.",
+    "Digitação rápida economiza tempo e reduz a fadiga em longas jornadas de trabalho.",
+    "Treine com foco, corrija os erros e observe sua evolução semana a semana."
+  ],
+  profissional: [
+    "A datilografia profissional exige domínio completo do teclado, incluindo pontuação, números e símbolos especiais: @ # $ % & * ( ) - _ = + [ ] { } ; : ' \" , . / ?",
+    "Em ambientes corporativos, a capacidade de digitar 80+ palavras por minuto com precisão acima de 97% é considerada um diferencial competitivo significativo.",
+    "Códigos, relatórios e e-mails são produzidos com maior eficiência quando o digitador não precisa olhar para o teclado. Isso se chama 'touch typing' ou digitação cega.",
+    "Desafios diários e provas oficiais mantêm a motivação alta. A consistência no treino garante evolução constante na velocidade e precisão."
+  ]
+};
+
+const EXAM_TEXTS = {
+  iniciante: "A casa é alta e a sala é limpa. O sol brilha forte no céu azul. Eu gosto de ler livros e escrever cartas. A vida é bela quando se tem paz e saúde.",
+  intermediario: "A velocidade de digitação é medida em palavras por minuto, ou PPM. Uma pessoa bem treinada consegue ultrapassar 60 PPM com facilidade. A precisão, no entanto, é tão importante quanto a velocidade. Erros frequentes atrasam o trabalho e geram retrabalho desnecessário.",
+  profissional: "No século XXI, a digitação eficiente tornou-se uma habilidade essencial em praticamente todas as áreas profissionais. Desenvolvedores, escritores, analistas e gestores dependem da capacidade de produzir texto de forma rápida e precisa. O teclado QWERTY, apesar de suas limitações históricas, continua sendo o padrão mundial. Dominar completamente este layout, incluindo teclas de função, atalhos e símbolos, eleva a produtividade a outro nível. Provas oficiais medem não apenas velocidade bruta, mas também consistência e precisão sob pressão de tempo."
+};
+
+/* ===================== TYPING ENGINE ===================== */
+let typingState = {
+  text: '',
+  mode: 'lesson', // lesson | test | exam | challenge
+  level: 'iniciante',
+  started: false,
+  startTime: null,
+  timerInterval: null,
+  duration: 0, // 0 = free, >0 = timed seconds
+  errors: 0,
+  totalTyped: 0,
+  finished: false
+};
+
+function renderTextDisplay() {
+  const display = document.getElementById('textDisplay');
+  const input = document.getElementById('typeInput').value;
+  let html = '';
+  for (let i = 0; i < typingState.text.length; i++) {
+    let cls = 'char pending';
+    if (i < input.length) {
+      cls = input[i] === typingState.text[i] ? 'char correct' : 'char incorrect';
+    } else if (i === input.length) {
+      cls = 'char current';
+    }
+    const ch = typingState.text[i] === ' ' ? '&nbsp;' : typingState.text[i];
+    html += `<span class="${cls}">${ch}</span>`;
+  }
+  display.innerHTML = html;
+}
+
+function startTypingSession(text, mode, level, duration = 0) {
+  typingState = {
+    text, mode, level, started: false, startTime: null,
+    timerInterval: null, duration, errors: 0, totalTyped: 0, finished: false
+  };
+  document.getElementById('typeInput').value = '';
+  document.getElementById('typeInput').disabled = false;
+  document.getElementById('statTime').textContent = duration ? formatTime(duration) : '0:00';
+  document.getElementById('statWpm').textContent = '0';
+  document.getElementById('statAcc').textContent = '100%';
+  document.getElementById('statErrors').textContent = '0';
+  document.getElementById('btnStart').style.display = '';
+  document.getElementById('btnReset').style.display = 'none';
+  document.getElementById('btnFinish').style.display = 'none';
+  renderTextDisplay();
+  showPage('typing');
+  const titles = { lesson: 'Exercício', test: 'Teste Rápido', exam: 'Prova Oficial', challenge: 'Desafio Diário' };
+  document.getElementById('typingTitle').textContent = titles[mode] + (level ? ' — ' + level.charAt(0).toUpperCase() + level.slice(1) : '');
+}
+
+function startTyping() {
+  if (typingState.started) return;
+  typingState.started = true;
+  typingState.startTime = Date.now();
+  document.getElementById('btnStart').style.display = 'none';
+  document.getElementById('btnReset').style.display = '';
+  document.getElementById('btnFinish').style.display = '';
+  document.getElementById('typeInput').focus();
+
+  typingState.timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - typingState.startTime) / 1000);
+    if (typingState.duration > 0) {
+      const left = typingState.duration - elapsed;
+      document.getElementById('statTime').textContent = formatTime(Math.max(0, left));
+      if (left <= 0) finishTyping();
+    } else {
+      document.getElementById('statTime').textContent = formatTime(elapsed);
+    }
+    updateLiveStats();
+  }, 200);
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m + ':' + String(sec).padStart(2, '0');
+}
+
+function updateLiveStats() {
+  const input = document.getElementById('typeInput').value;
+  const elapsed = Math.max(1, (Date.now() - typingState.startTime) / 1000 / 60);
+  const words = input.length / 5;
+  const wpm = Math.round(words / elapsed);
+  let errors = 0;
+  for (let i = 0; i < input.length; i++) {
+    if (input[i] !== typingState.text[i]) errors++;
+  }
+  const acc = input.length ? Math.max(0, Math.round((1 - errors / input.length) * 100)) : 100;
+  document.getElementById('statWpm').textContent = wpm;
+  document.getElementById('statAcc').textContent = acc + '%';
+  document.getElementById('statErrors').textContent = errors;
+  typingState.errors = errors;
+  typingState.totalTyped = input.length;
+}
+
+document.getElementById('typeInput').addEventListener('input', () => {
+  if (!typingState.started) startTyping();
+  renderTextDisplay();
+  updateLiveStats();
+  if (document.getElementById('typeInput').value.length >= typingState.text.length && typingState.duration === 0) {
+    finishTyping();
+  }
+});
+
+function resetTyping() {
+  clearInterval(typingState.timerInterval);
+  startTypingSession(typingState.text, typingState.mode, typingState.level, typingState.duration);
+}
+
+function finishTyping() {
+  if (typingState.finished) return;
+  typingState.finished = true;
+  clearInterval(typingState.timerInterval);
+  document.getElementById('typeInput').disabled = true;
+
+  const input = document.getElementById('typeInput').value;
+  const elapsedSec = Math.max(1, Math.floor((Date.now() - typingState.startTime) / 1000));
+  const elapsedMin = elapsedSec / 60;
+  const words = input.length / 5;
+  const wpm = Math.round(words / elapsedMin);
+  let errors = 0;
+  for (let i = 0; i < Math.min(input.length, typingState.text.length); i++) {
+    if (input[i] !== typingState.text[i]) errors++;
+  }
+  errors += Math.abs(input.length - typingState.text.length) > 0 && input.length < typingState.text.length ? 0 : 0;
+  const acc = input.length ? Math.max(0, Math.round((1 - errors / Math.max(input.length, 1)) * 100)) : 0;
+
+  // Grade
+  let score = Math.round(wpm * 0.6 + acc * 0.4);
+  if (typingState.mode === 'exam') {
+    // stricter
+    score = Math.round(wpm * 0.5 + acc * 0.5);
+  }
+  let grade = 'F';
+  if (score >= 90) grade = 'A';
+  else if (score >= 80) grade = 'B';
+  else if (score >= 70) grade = 'C';
+  else if (score >= 60) grade = 'D';
+
+  // Save to user
+  const user = getUser();
+  if (user) {
+    user.wpmHistory.push(wpm);
+    user.accHistory.push(acc);
+    if (user.wpmHistory.length > 30) { user.wpmHistory.shift(); user.accHistory.shift(); }
+    user.totalTests = (user.totalTests || 0) + 1;
+    user.avgWpm = Math.round(user.wpmHistory.reduce((a,b)=>a+b,0) / user.wpmHistory.length);
+    user.avgAcc = Math.round(user.accHistory.reduce((a,b)=>a+b,0) / user.accHistory.length);
+
+    if (typingState.mode === 'exam') {
+      user.exams = user.exams || [];
+      user.exams.unshift({ level: typingState.level, wpm, acc, grade, score, date: new Date().toISOString() });
+      if (user.exams.length > 10) user.exams.pop();
+    }
+    if (typingState.mode === 'challenge') {
+      completeChallenge();
+    }
+    saveDB(db);
+  }
+
+  // Show result
+  document.getElementById('resultGrade').textContent = grade;
+  document.getElementById('resultGrade').className = 'grade ' + grade;
+  document.getElementById('resultMsg').textContent =
+    typingState.mode === 'exam'
+      ? (score >= 70 ? 'Parabéns! Você foi aprovado.' : 'Não aprovado. Treine mais e tente novamente.')
+      : `Você alcançou ${wpm} PPM com ${acc}% de precisão.`;
+  document.getElementById('resWpm').textContent = wpm;
+  document.getElementById('resAcc').textContent = acc + '%';
+  document.getElementById('resTime').textContent = elapsedSec + 's';
+  document.getElementById('resErrors').textContent = errors;
+
+  // Chart
+  setTimeout(() => {
+    const ctx = document.getElementById('resultChart').getContext('2d');
+    if (window.resultChartObj) window.resultChartObj.destroy();
+    const hist = user ? user.wpmHistory.slice(-10) : [wpm];
+    window.resultChartObj = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: hist.map((_,i) => '#' + (i+1)),
+        datasets: [{
+          label: 'PPM',
+          data: hist,
+          borderColor: '#00f5ff',
+          backgroundColor: 'rgba(0,245,255,0.15)',
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: '#ff00aa'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#e0e0ff' } } },
+        scales: {
+          x: { ticks: { color: '#8890b0' }, grid: { color: 'rgba(0,245,255,0.1)' } },
+          y: { ticks: { color: '#8890b0' }, grid: { color: 'rgba(0,245,255,0.1)' }, beginAtZero: true }
+        }
+      }
+    });
+  }, 100);
+
+  showPage('result');
+}
+
+/* ===================== LESSONS ===================== */
+function renderLessons() {
+  const grid = document.getElementById('lessonsGrid');
+  grid.innerHTML = '';
+  ['iniciante','intermediario','profissional'].forEach(level => {
+    const texts = TEXTS[level];
+    texts.forEach((t, i) => {
+      const card = document.createElement('div');
+      card.className = 'level-card ' + level;
+      card.innerHTML = `
+        <div class="level-icon">${level==='iniciante'?'🌱':level==='intermediario'?'⚡':'🔥'}</div>
+        <h3 style="color:${level==='iniciante'?'var(--neon-green)':level==='intermediario'?'var(--neon-cyan)':'var(--neon-pink)'}">
+          ${level.charAt(0).toUpperCase()+level.slice(1)} #${i+1}
+        </h3>
+        <p>${t.slice(0,60)}...</p>
+        <button class="btn btn-primary" style="margin-top:8px">Praticar</button>
+      `;
+      card.querySelector('button').onclick = (e) => {
+        e.stopPropagation();
+        startTypingSession(t, 'lesson', level, 0);
+      };
+      grid.appendChild(card);
+    });
+  });
+}
+
+/* ===================== QUICK TEST ===================== */
+function startQuickTest(seconds) {
+  const all = [...TEXTS.intermediario, ...TEXTS.profissional];
+  const text = all[Math.floor(Math.random() * all.length)];
+  // repeat text to fill time
+  let long = text;
+  while (long.length < seconds * 8) long += ' ' + text;
+  startTypingSession(long, 'test', null, seconds);
+}
+
+/* ===================== EXAM ===================== */
+function startExam(level) {
+  const text = EXAM_TEXTS[level];
+  const duration = level === 'iniciante' ? 120 : level === 'intermediario' ? 180 : 300;
+  startTypingSession(text, 'exam', level, duration);
+}
+
+function renderExamHistory() {
+  const user = getUser();
+  const card = document.getElementById('examHistoryCard');
+  const box = document.getElementById('examHistory');
+  if (!user || !user.exams || !user.exams.length) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+  box.innerHTML = user.exams.map(e => `
+    <div style="padding:10px 0; border-bottom:1px solid rgba(0,245,255,0.15)">
+      <strong style="color:var(--neon-cyan)">${e.level}</strong> —
+      Nota <span style="color:var(--neon-pink)">${e.grade}</span>
+      (${e.wpm} PPM, ${e.acc}%) —
+      <span style="color:var(--muted)">${new Date(e.date).toLocaleDateString('pt-BR')}</span>
+    </div>
+  `).join('');
+}
+
+/* ===================== CHALLENGES ===================== */
+function getWeekStart() {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(d.setDate(diff)).toISOString().slice(0,10);
+}
+
+function ensureWeekReset(user) {
+  const ws = getWeekStart();
+  if (user.weekStart !== ws) {
+    user.challengesThisWeek = 0;
+    user.weekStart = ws;
+  }
+}
+
+function getDailyChallenges() {
+  // deterministic by date
+  const today = new Date().toISOString().slice(0,10);
+  const seed = today.split('-').reduce((a,b)=>a+parseInt(b),0);
+  const levels = ['iniciante','intermediario','profissional'];
+  const challenges = [];
+  for (let i = 0; i < 3; i++) {
+    const level = levels[(seed + i) % 3];
+    const texts = TEXTS[level];
+    const text = texts[(seed + i * 3) % texts.length];
+    challenges.push({
+      id: today + '-' + i,
+      level,
+      text,
+      title: `Desafio ${i+1}: ${level.charAt(0).toUpperCase()+level.slice(1)}`,
+      targetWpm: level === 'iniciante' ? 25 : level === 'intermediario' ? 40 : 60
+    });
+  }
+  return challenges;
+}
+
+function renderChallenges() {
+  const user = getUser();
+  if (!user) return;
+  ensureWeekReset(user);
+  const list = document.getElementById('challengesList');
+  const challenges = getDailyChallenges();
+  const doneToday = JSON.parse(safeGet('kp_done_' + currentUser + '_' + new Date().toISOString().slice(0,10)) || '[]');
+
+  document.getElementById('weekProgress').textContent =
+    `Desafios concluídos nesta semana: ${user.challengesThisWeek || 0}`;
+
+  list.innerHTML = challenges.map(c => {
+    const done = doneToday.includes(c.id);
+    return `
+      <div class="challenge-card ${done ? 'done' : ''}">
+        <h3>${c.title}</h3>
+        <p style="color:var(--muted); font-size:0.9rem">${c.text.slice(0,80)}...</p>
+        <p class="challenge-status">
+          ${done ? '✅ Concluído hoje' : 'Meta: ' + c.targetWpm + '+ PPM'}
+        </p>
+        ${done ? '' : `<button class="btn btn-primary" style="margin-top:10px" onclick="startChallenge('${c.id}','${c.level}')">Fazer Desafio</button>`}
+      </div>
+    `;
+  }).join('');
+}
+
+function startChallenge(id, level) {
+  const challenges = getDailyChallenges();
+  const c = challenges.find(x => x.id === id);
+  if (!c) return;
+  window._currentChallengeId = id;
+  startTypingSession(c.text, 'challenge', level, 0);
+}
+
+function completeChallenge() {
+  const user = getUser();
+  if (!user) return;
+  ensureWeekReset(user);
+  const today = new Date().toISOString().slice(0,10);
+  const key = 'kp_done_' + currentUser + '_' + today;
+  const done = JSON.parse(safeGet(key) || '[]');
+  if (window._currentChallengeId && !done.includes(window._currentChallengeId)) {
+    done.push(window._currentChallengeId);
+    safeSet(key, JSON.stringify(done));
+    user.challengesThisWeek = (user.challengesThisWeek || 0) + 1;
+    user.lastChallengeDate = today;
+    saveDB(db);
+  }
+}
+
+/* ===================== RANKING (apenas usuários reais) ===================== */
+function renderRanking() {
+  const tbody = document.getElementById('rankingBody');
+  const emptyMsg = document.getElementById('rankingEmpty');
+  if (!tbody) return;
+
+  // Só usuários reais que já fizeram pelo menos 1 teste (sem dados falsos)
+  const entries = Object.entries(db.users)
+    .filter(([name, u]) => (u.totalTests || 0) > 0 || (u.wpmHistory && u.wpmHistory.length > 0))
+    .map(([name, u]) => {
+      ensureWeekReset(u);
+      return {
+        name,
+        avgWpm: u.avgWpm || 0,
+        avgAcc: u.avgAcc || 0,
+        totalTests: u.totalTests || (u.wpmHistory ? u.wpmHistory.length : 0),
+        weekly: u.challengesThisWeek || 0,
+        isYou: name === currentUser
+      };
+    })
+    .sort((a, b) => b.avgWpm - a.avgWpm || b.avgAcc - a.avgAcc);
+
+  if (entries.length === 0) {
+    tbody.innerHTML = '';
+    if (emptyMsg) emptyMsg.style.display = 'block';
+    return;
+  }
+  if (emptyMsg) emptyMsg.style.display = 'none';
+
+  tbody.innerHTML = entries.map((e, i) => `
+    <tr class="${e.isYou ? 'rank-you' : ''}">
+      <td class="rank-pos">${i + 1}</td>
+      <td>${e.name}${e.isYou ? ' (você)' : ''}</td>
+      <td>${e.avgWpm}</td>
+      <td>${e.avgAcc}%</td>
+      <td>${e.totalTests}</td>
+      <td>${e.weekly}</td>
+    </tr>
+  `).join('');
+}
+
+/* ===================== DASHBOARD ===================== */
+function refreshDashboard() {
+  const user = getUser();
+  if (!user) return;
+  ensureWeekReset(user);
+  document.getElementById('dashStats').innerHTML = `
+    <div class="dash-stat"><div class="num">${user.avgWpm || 0}</div><div class="lbl">PPM Médio</div></div>
+    <div class="dash-stat"><div class="num">${user.avgAcc || 100}%</div><div class="lbl">Precisão Média</div></div>
+    <div class="dash-stat"><div class="num">${user.totalTests || 0}</div><div class="lbl">Testes Feitos</div></div>
+    <div class="dash-stat"><div class="num">${user.challengesThisWeek || 0}</div><div class="lbl">Desafios na Semana</div></div>
+  `;
+
+  setTimeout(() => {
+    const ctx = document.getElementById('historyChart');
+    if (!ctx) return;
+    if (window.historyChartObj) window.historyChartObj.destroy();
+    const hist = user.wpmHistory || [];
+    window.historyChartObj = new Chart(ctx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: hist.map((_,i) => (i+1)),
+        datasets: [
+          {
+            label: 'PPM',
+            data: hist,
+            borderColor: '#00f5ff',
+            backgroundColor: 'rgba(0,245,255,0.1)',
+            fill: true,
+            tension: 0.3
+          },
+          {
+            label: 'Precisão %',
+            data: user.accHistory || [],
+            borderColor: '#ff00aa',
+            backgroundColor: 'rgba(255,0,170,0.08)',
+            fill: true,
+            tension: 0.3,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#e0e0ff' } } },
+        scales: {
+          x: { ticks: { color: '#8890b0' }, grid: { color: 'rgba(0,245,255,0.08)' } },
+          y: { ticks: { color: '#8890b0' }, grid: { color: 'rgba(0,245,255,0.08)' }, beginAtZero: true },
+          y1: { position: 'right', ticks: { color: '#ff00aa' }, grid: { drawOnChartArea: false }, min: 50, max: 100 }
+        }
+      }
+    });
+  }, 80);
+}
+
+/* ===================== INIT ===================== */
+updateNav();
+if (currentUser) {
+  showPage('dashboard');
+  refreshDashboard();
+}
+</script>
+</body>
+</html>
